@@ -20,6 +20,7 @@ resource "google_compute_instance" "instance" {
     mode = "READ_WRITE"
     device_name = google_compute_disk.default.name
   }
+  tags = var.tag
 }
 
 resource "google_compute_disk" "default" {
@@ -27,7 +28,6 @@ resource "google_compute_disk" "default" {
   type  = "pd-standard"
   size = var.disk_size
   physical_block_size_bytes = var.disk_block_size
-  tags = var.tag
 }
 
 data google_compute_subnetwork "ip_cidr"{
