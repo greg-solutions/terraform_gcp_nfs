@@ -48,7 +48,7 @@ resource "google_compute_firewall" "nfs_access" {
 }
 
 resource "google_compute_firewall" "ssh_access" {
-  name = "ssh-access"
+  name = "ssh-nfs-access"
   network = var.network
   direction = "INGRESS"
   priority = 100
