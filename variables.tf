@@ -6,7 +6,7 @@ variable "subnet" {
 }
 variable "instance_name" {
   description = "(Optional) Custom instance name"
-  default = "nfs-instance"
+  default = "nfs-server"
 }
 variable "instance_type" {
   description = "(Optional) Custom instance type(size)"
