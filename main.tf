@@ -4,7 +4,7 @@ resource "google_compute_instance" "instance" {
   boot_disk {
     initialize_params {
       image = "ubuntu-1804-lts"
-      size = var.disk_size
+      size = var.node_disk_size
     }
   }
   network_interface {
