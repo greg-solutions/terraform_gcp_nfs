@@ -21,6 +21,8 @@ resource "google_compute_instance" "instance" {
     device_name = google_compute_disk.default.name
   }
   tags = var.tag
+
+  depends_on = [google_compute_disk.default]
 }
 
 resource "google_compute_disk" "default" {
@@ -28,10 +30,6 @@ resource "google_compute_disk" "default" {
   type  = "pd-standard"
   size = var.disk_size
   physical_block_size_bytes = var.disk_block_size
-}
-
-data google_compute_subnetwork "ip_cidr"{
-  name = var.subnet
 }
 
 resource "google_compute_firewall" "nfs_access" {
@@ -45,6 +43,8 @@ resource "google_compute_firewall" "nfs_access" {
     ports = ["2049"]
   }
   target_tags = var.tag
+
+  depends_on = [data.google_compute_subnetwork.ip_cidr]
 }
 
 resource "google_compute_firewall" "ssh_access" {
@@ -58,4 +58,6 @@ resource "google_compute_firewall" "ssh_access" {
     ports = ["22"]
   }
   target_tags = var.tag
+
+  depends_on = [data.google_compute_subnetwork.ip_cidr]
 }
