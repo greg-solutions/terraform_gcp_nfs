@@ -61,3 +61,30 @@ resource "google_compute_firewall" "ssh_access" {
 
   depends_on = [google_compute_instance.instance]
 }
+
+resource "google_compute_resource_policy" "disk_snapshot" {
+  count = var.enable_snapshot ? 1 : 0
+  name   = var.snapshot_policy_name
+  snapshot_schedule_policy {
+    schedule {
+      daily_schedule {
+        days_in_cycle = var.snapshot_period_days
+        start_time     = var.snapshot_start_time
+      }
+    }
+    retention_policy {
+      max_retention_days    = var.snapshot_max_retention_days
+      on_source_disk_delete = var.snapshot_after_deleting_disk
+    }
+    snapshot_properties {
+      labels = var.snapshot_labels
+      storage_locations = var.snapshot_storage_location
+      guest_flush       = true
+    }
+  }
+}
+resource "google_compute_disk_resource_policy_attachment" "attachment" {
+  count = var.enable_snapshot ? 1 : 0
+  name = google_compute_resource_policy.disk_snapshot.0.name
+  disk = google_compute_disk.default.name
+}
