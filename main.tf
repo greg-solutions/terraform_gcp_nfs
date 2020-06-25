@@ -16,9 +16,9 @@ resource "google_compute_instance" "instance" {
   }
   metadata_startup_script = file("${path.module}/startup.sh")
   attached_disk {
-    source = google_compute_disk.default.self_link
+    source = var.create_disk ? google_compute_disk.default.0.self_link : var.disk_self_link
     mode = "READ_WRITE"
-    device_name = google_compute_disk.default.name
+    device_name = var.create_disk ? google_compute_disk.default.0.name : var.disk_name
   }
   tags = var.tag
 
@@ -26,6 +26,8 @@ resource "google_compute_instance" "instance" {
 }
 
 resource "google_compute_disk" "default" {
+  count = var.create_disk ? 1 : 0
+
   name  = var.disk_name
   type  = "pd-standard"
   size = var.disk_size
@@ -64,6 +66,7 @@ resource "google_compute_firewall" "ssh_access" {
 
 resource "google_compute_resource_policy" "disk_snapshot" {
   count = var.enable_snapshot ? 1 : 0
+
   name   = var.snapshot_policy_name
   snapshot_schedule_policy {
     schedule {
@@ -85,6 +88,7 @@ resource "google_compute_resource_policy" "disk_snapshot" {
 }
 resource "google_compute_disk_resource_policy_attachment" "attachment" {
   count = var.enable_snapshot ? 1 : 0
+
   name = google_compute_resource_policy.disk_snapshot.0.name
-  disk = google_compute_disk.default.name
+  disk = var.disk_name
 }

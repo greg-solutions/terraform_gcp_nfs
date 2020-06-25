@@ -97,3 +97,14 @@ variable "snapshot_storage_location" {
   description = "(Required) Location where nfs-disk snapshots should be stored"
   default = null
 }
+variable "create_disk" {
+  type = bool
+  description = "(Optional) Create disk or use disk from disk_name variable"
+  default = true
+}
+
+variable "disk_self_link" {
+  type = string
+  description = "Required if crate disk false"
+  default = ""
+}
