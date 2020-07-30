@@ -15,6 +15,10 @@ variable "instance_type" {
   description = "(Optional) Custom instance type(size)"
   default = "n1-standard-1"
 }
+variable "compute_zone" {
+  type = string
+  description = "Google Compute Zone"
+}
 variable "disk_name" {
   type = string
   description = "(Optional) Custom disk name"
@@ -102,9 +106,20 @@ variable "create_disk" {
   description = "(Optional) Create disk or use disk from disk_name variable"
   default = true
 }
-
 variable "disk_self_link" {
   type = string
-  description = "Required if crate disk false"
+  description = "Required if create disk false"
   default = ""
+}
+variable "nfs_watchdog_check_interval_minutes" {
+  description = "(Optional) How often (in minutes) should NFS watchdog check disk fullness"
+  default = 10
+}
+variable "nfs_watchdog_custom_threshold" {
+  description = "(Optional) How full should be a NFS disk (in %) to be increased"
+  default = 80
+}
+variable "nfs_watchdog_custom_incr_step" {
+  description = "(Optional) How much should NFS watchdog increase the NFS disk (in GBytes) when it is over the threshold."
+  default = 10
 }
