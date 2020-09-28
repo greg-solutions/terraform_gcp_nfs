@@ -55,18 +55,31 @@ google_disk_name=$(echo "$GOOGLE_DISK_ID" | awk -F/ '{print $NF}')
 # Monitor the disk, main loop
 while true;
 do
-  disk_size=$(( $(lsblk $local_disk_name -b -o SIZE | tail -n1) / 1000000000 ))
-  disk_fill_pcent=$(df "$NFS_SHARE_NAME" | tail -n1 | awk '{print $5}' | grep -Eo "[0-9]+")
-  if [ "$disk_fill_pcent" -ge "$threshold" ]; then
+  # count in megabytes
+  disk_size=$(( $(lsblk $local_disk_name -b -o SIZE | tail -n1) / 1000000 ))
+  disk_fill_pcent=$(( $(du -s -m "$NFS_SHARE_NAME" | awk '{print $1}') * 100 / $disk_size ))
+  echo "[i][$(timestamp)] Disk size now: ${disk_size}"
+  echo "[i][$(timestamp)] Disk filled by: ${disk_fill_pcent} %"
+
+  # convert disk size into Gigabytes
+  disk_size=$(( $disk_size / 1000 ))
+  
+  if [[ "$disk_fill_pcent" > "$threshold" ]]; then
+    echo "[i][$(timestamp)] Disk is filled more than ${threshold}%"
+    
     disk_size=$((disk_size + increase_step_gb))
     echo "[~][$(timestamp)] Starting to resize disk by +${INCREASE_STEP_GB}GB"
+    echo "[i][$(timestamp)] New disk size will be ${disk_size} GB"
+    
     gcloud compute disks resize $google_disk_name --zone=$google_zone --quiet --size=$disk_size
-    ! [[ $? -eq 0 ]] && echoerror "Error caused by gcloud" && exit 1
+    [[ "$?" != "0" ]] && echoerror "Error caused by gcloud" && exit 1
+    
     resize2fs $local_disk_name
     echo "[+][$(timestamp)] Resized disk. New size is $disk_size"
   else
-    echo "[+][$(timestamp)] Disk capacity is below the threshold"
+    echo "[i][$(timestamp)] Disk capacity is below the threshold"
   fi
+  echo "[s][$(timestamp)] Sleeping $check_interval_minutes minutes"
   sleep "${check_interval_minutes}m"
 done
 
